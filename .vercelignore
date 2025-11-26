@@ -1,0 +1,11 @@
+node_modules
+.env
+.env.local
+contracts/node_modules
+contracts/artifacts
+contracts/cache
+contracts/coverage
+frontend/node_modules
+frontend/dist
+.vscode
+*.log
