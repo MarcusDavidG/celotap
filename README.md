@@ -105,6 +105,11 @@ The `CeloTapPayment.sol` contract provides:
 
 ## Deployment
 
+### 🌐 Live Demo
+**Production:** https://celotap.vercel.app
+
+The app is deployed on Vercel and connected to Celo Sepolia Testnet.
+
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
 
 ## Testing
@@ -137,12 +142,14 @@ See [TODO.md](./TODO.md) for the complete project roadmap.
 
 **Completed:**
 - ✅ Project setup
-- ✅ Smart contract implementation
-- ✅ Contract tests and deployment scripts
-- ✅ Frontend wallet integration
-- ✅ Payment UI (send/receive)
+- ✅ Smart contract implementation & deployment (Celo Sepolia)
+- ✅ Contract tests (8/8 passing)
+- ✅ Modern Web3 UI with Celo branding
+- ✅ Frontend wallet integration (MetaMask/Valora)
+- ✅ Payment UI (send/receive CELO & cUSD)
 - ✅ QR code generation
-- ✅ Merchant mode
+- ✅ Merchant mode with preset amounts
+- ✅ **Production deployment on Vercel**
 
 **Upcoming:**
 - 🔲 Backend for address book syncing
