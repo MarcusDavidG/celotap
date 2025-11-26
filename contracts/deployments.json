@@ -1,0 +1,14 @@
+{
+  "sepolia": {
+    "network": "Celo Sepolia Testnet",
+    "chainId": 11142220,
+    "rpcUrl": "https://forno.celo-sepolia.celo-testnet.org",
+    "explorer": "https://celo-sepolia.blockscout.com/",
+    "contracts": {
+      "CeloTapPayment": "0xba5f7756a16ce91123B22CE18B434C9d839b5438",
+      "cUSD": "0xEF4d55D6dE8e8d73232827Cd1e9b2F2dBb45bC80"
+    },
+    "deployedAt": "2025-11-26",
+    "deployer": "0x4Cf54C5e5f3f6e8C8B0e2e5D4b3f3b7b8b8b1282"
+  }
+}

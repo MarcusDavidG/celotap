@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useCelo } from '../context/CeloContext';
+import { FaStore, FaArrowLeft, FaPrint } from 'react-icons/fa';
+import { IoSparkles } from 'react-icons/io5';
+import { RiCopperCoinFill } from 'react-icons/ri';
 
 const MerchantMode = () => {
   const { address } = useCelo();
   const [amount, setAmount] = useState('');
   const [reference, setReference] = useState('');
   const [showQR, setShowQR] = useState(false);
+
+  const presetAmounts = [5, 10, 20, 50, 100, 200];
 
   const generatePaymentData = () => {
     const data = {
@@ -32,110 +37,151 @@ const MerchantMode = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Merchant Mode</h2>
-        
+    <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+      <div className="glass-effect rounded-2xl p-8 border border-celo-purple/30">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-3xl font-bold gradient-text mb-2">Merchant Mode</h2>
+            <p className="text-gray-400 text-sm">Quick payment requests for your business</p>
+          </div>
+          <div className="w-12 h-12 bg-gradient-purple rounded-xl flex items-center justify-center">
+            <FaStore className="text-xl text-white" />
+          </div>
+        </div>
+
         {!showQR ? (
           <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Amount to Request (cUSD)
+            {/* Amount Input */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-300">
+                Amount to Request
               </label>
-              <input
-                type="number"
-                step="0.01"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0.00"
-                className="w-full px-4 py-3 text-2xl border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
+              <div className="relative">
+                <RiCopperCoinFill className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl text-celo-primary" />
+                <input
+                  type="number"
+                  step="0.01"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full pl-14 pr-4 py-4 text-3xl font-bold glass-effect rounded-xl border border-white/20 focus:border-celo-purple focus:ring-2 focus:ring-celo-purple/50 transition-all text-white placeholder-gray-500"
+                  required
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            {/* Preset Amounts */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-300">
+                Quick Select
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                {presetAmounts.map((preset) => (
+                  <button
+                    key={preset}
+                    onClick={() => setAmount(preset.toString())}
+                    className="px-4 py-3 glass-effect rounded-xl border border-white/20 hover:border-celo-primary hover:bg-celo-primary/10 transition-all font-semibold text-white"
+                  >
+                    ${preset}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-300">
                 Description (Optional)
               </label>
               <input
                 type="text"
                 value={reference}
                 onChange={(e) => setReference(e.target.value)}
-                placeholder="Product or service description"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Product or service description..."
+                className="w-full px-4 py-3 glass-effect rounded-xl border border-white/20 focus:border-celo-purple focus:ring-2 focus:ring-celo-purple/50 transition-all text-white placeholder-gray-500"
               />
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
-              {[5, 10, 20, 50, 100, 200].map((preset) => (
-                <button
-                  key={preset}
-                  onClick={() => setAmount(preset.toString())}
-                  className="px-4 py-3 bg-gray-100 text-gray-900 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  ${preset}
-                </button>
-              ))}
-            </div>
-
+            {/* Request Button */}
             <button
               onClick={handleRequestPayment}
-              className="w-full bg-green-600 text-white py-4 text-lg rounded-lg hover:bg-green-700 transition-colors"
+              className="w-full py-4 bg-gradient-purple text-white font-bold rounded-xl shadow-glow hover:scale-[1.02] transition-all duration-300 flex items-center justify-center space-x-2"
             >
-              Request Payment
+              <IoSparkles />
+              <span>Generate Payment Request</span>
             </button>
+
+            {/* Merchant Tips */}
+            <div className="glass-effect rounded-xl p-4 border border-yellow-500/20">
+              <h3 className="text-sm font-semibold text-yellow-400 mb-2 flex items-center space-x-2">
+                <IoSparkles />
+                <span>Merchant Tips</span>
+              </h3>
+              <ul className="text-sm text-gray-400 space-y-1">
+                <li>• Use preset amounts for faster checkout</li>
+                <li>• Add descriptions to help customers identify purchases</li>
+                <li>• Print QR codes for fixed-price items</li>
+              </ul>
+            </div>
           </div>
         ) : (
           <div className="space-y-6">
-            <div className="text-center">
-              <p className="text-gray-600 mb-2">Request for</p>
-              <p className="text-4xl font-bold text-green-600 mb-4">
-                ${parseFloat(amount).toFixed(2)} cUSD
-              </p>
+            {/* Payment Request Display */}
+            <div className="text-center space-y-4">
+              <div className="inline-flex items-center space-x-2 px-4 py-2 bg-celo-purple/20 rounded-full">
+                <span className="text-sm text-gray-400">Requesting</span>
+              </div>
+              <div className="flex items-center justify-center space-x-3">
+                <RiCopperCoinFill className="text-4xl text-celo-primary" />
+                <p className="text-5xl font-bold gradient-text">
+                  ${parseFloat(amount).toFixed(2)}
+                </p>
+              </div>
               {reference && (
-                <p className="text-gray-700 mb-4">{reference}</p>
+                <p className="text-gray-400 text-lg">{reference}</p>
               )}
             </div>
 
+            {/* QR Code */}
             <div className="flex flex-col items-center">
-              <div className="bg-white p-6 rounded-lg border-4 border-green-500 mb-4">
-                <QRCodeSVG
-                  value={generatePaymentData()}
-                  size={300}
-                  level="H"
-                  includeMargin={true}
-                />
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-purple rounded-2xl blur-xl opacity-30 animate-pulse" />
+                <div className="relative bg-white p-8 rounded-2xl shadow-glow">
+                  <QRCodeSVG
+                    value={generatePaymentData()}
+                    size={320}
+                    level="H"
+                    includeMargin={false}
+                  />
+                </div>
               </div>
-              <p className="text-sm text-gray-600 text-center mb-6">
-                Customer can scan this QR code to pay
-              </p>
+              <div className="flex items-center space-x-2 mt-4 text-gray-400">
+                <IoSparkles className="text-celo-purple" />
+                <p className="text-sm">Customer can scan to pay</p>
+                <IoSparkles className="text-celo-purple" />
+              </div>
             </div>
 
+            {/* Action Buttons */}
             <div className="grid grid-cols-2 gap-4">
               <button
                 onClick={handleNewRequest}
-                className="px-4 py-3 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300 transition-colors"
+                className="flex items-center justify-center space-x-2 px-4 py-3 glass-effect border border-white/20 rounded-xl hover:border-white/40 transition-all text-white"
               >
-                New Request
+                <FaArrowLeft />
+                <span>New Request</span>
               </button>
               <button
                 onClick={() => window.print()}
-                className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center justify-center space-x-2 px-4 py-3 bg-celo-primary/20 border border-celo-primary/50 text-celo-primary rounded-xl hover:bg-celo-primary/30 transition-all"
               >
-                Print QR
+                <FaPrint />
+                <span>Print QR</span>
               </button>
             </div>
           </div>
         )}
-      </div>
-
-      <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <h3 className="text-sm font-semibold text-yellow-800 mb-2">Merchant Tips</h3>
-        <ul className="text-sm text-yellow-700 space-y-1">
-          <li>• Use preset amounts for faster checkout</li>
-          <li>• Add descriptions to help customers identify their purchases</li>
-          <li>• You can print QR codes for fixed-price items</li>
-        </ul>
       </div>
     </div>
   );

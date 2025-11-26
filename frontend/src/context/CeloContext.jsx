@@ -28,7 +28,7 @@ export const CeloProvider = ({ children }) => {
         const signer = provider.getSigner();
         const userAddress = await signer.getAddress();
         
-        const celoKit = newKit(import.meta.env.VITE_CELO_RPC_URL || 'https://alfajores-forno.celo-testnet.org');
+        const celoKit = newKit(import.meta.env.VITE_CELO_RPC_URL || 'https://forno.celo-sepolia.celo-testnet.org');
         celoKit.defaultAccount = userAddress;
         
         setKit(celoKit);
@@ -69,20 +69,23 @@ export const CeloProvider = ({ children }) => {
     setCUSDBalance('0');
   };
 
-  const switchToAlfajores = async () => {
+  const switchToSepolia = async () => {
     try {
+      const chainId = import.meta.env.VITE_CHAIN_ID || '11142220';
+      const chainIdHex = '0x' + parseInt(chainId).toString(16);
+      
       await window.ethereum.request({
         method: 'wallet_addEthereumChain',
         params: [{
-          chainId: '0xaef3',
-          chainName: 'Celo Alfajores Testnet',
+          chainId: chainIdHex,
+          chainName: 'Celo Sepolia Testnet',
           nativeCurrency: {
             name: 'CELO',
             symbol: 'CELO',
             decimals: 18
           },
-          rpcUrls: ['https://alfajores-forno.celo-testnet.org'],
-          blockExplorerUrls: ['https://alfajores.celoscan.io/']
+          rpcUrls: [import.meta.env.VITE_CELO_RPC_URL || 'https://forno.celo-sepolia.celo-testnet.org'],
+          blockExplorerUrls: ['https://celo-sepolia.blockscout.com/']
         }]
       });
     } catch (error) {
@@ -115,7 +118,7 @@ export const CeloProvider = ({ children }) => {
     connectWallet,
     disconnectWallet,
     updateBalances: () => updateBalances(kit, address),
-    switchToAlfajores,
+    switchToSepolia,
   };
 
   return <CeloContext.Provider value={value}>{children}</CeloContext.Provider>;
