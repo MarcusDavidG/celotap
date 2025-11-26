@@ -4,6 +4,20 @@
 
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-gradient-to-br from-gray-900 via-celo-darkBlue to-gray-900 text-white min-h-screen;
+  }
+}
+
+@layer utilities {
+  .glass-effect {
+    @apply bg-white/10 backdrop-blur-lg border border-white/20;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-300 hover:scale-105 hover:shadow-glow;
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-celo bg-clip-text text-transparent;
   }
 }

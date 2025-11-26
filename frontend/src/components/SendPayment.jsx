@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { useCelo } from '../context/CeloContext';
 import { ethers } from 'ethers';
+import { FaPaperPlane, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
+import { RiCopperCoinFill } from 'react-icons/ri';
+import { IoSparkles } from 'react-icons/io5';
 
 const SendPayment = () => {
   const { kit, address, updateBalances, cUSDBalance, balance } = useCelo();
   const [recipient, setRecipient] = useState('');
   const [amount, setAmount] = useState('');
   const [reference, setReference] = useState('');
-  const [token, setToken] = useState('CELO'); // Default to CELO since it works
+  const [token, setToken] = useState('CELO');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -28,9 +31,8 @@ const SendPayment = () => {
       }
 
       const amountInWei = ethers.utils.parseEther(amount);
-      
-      // Check balance based on selected token
       const availableBalance = token === 'CELO' ? balance : cUSDBalance;
+      
       if (parseFloat(amount) > parseFloat(availableBalance)) {
         throw new Error(`Insufficient ${token} balance`);
       }
@@ -38,7 +40,6 @@ const SendPayment = () => {
       let tx;
       
       if (token === 'CELO') {
-        // Send native CELO
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
         
@@ -50,7 +51,6 @@ const SendPayment = () => {
         await tx.wait();
         setSuccess(`Payment sent successfully! Tx: ${tx.hash}`);
       } else {
-        // Send cUSD token
         const cUSDAddress = import.meta.env.VITE_CUSD_ADDRESS || '0xEF4d55D6dE8e8d73232827Cd1e9b2F2dBb45bC80';
         const stableToken = await kit.contracts.getStableToken(cUSDAddress);
         
@@ -77,27 +77,81 @@ const SendPayment = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Send Payment</h2>
-        
-        <form onSubmit={handleSend} className="space-y-6">
+    <div className="max-w-3xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+      <div className="glass-effect rounded-2xl p-8 border border-celo-primary/30">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <h2 className="text-3xl font-bold gradient-text mb-2">Send Payment</h2>
+            <p className="text-gray-400 text-sm">Transfer crypto to any address instantly</p>
+          </div>
+          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+            <FaPaperPlane className="text-xl text-white" />
+          </div>
+        </div>
+
+        <form onSubmit={handleSend} className="space-y-6">
+          {/* Token Selector */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-300">
               Select Token
             </label>
-            <select
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="CELO">CELO (Native)</option>
-              <option value="cUSD">cUSD (Stablecoin)</option>
-            </select>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                type="button"
+                onClick={() => setToken('CELO')}
+                className={`p-4 rounded-xl border-2 transition-all ${
+                  token === 'CELO'
+                    ? 'border-celo-primary bg-celo-primary/20 shadow-glow'
+                    : 'border-white/20 bg-white/5 hover:border-white/40'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <RiCopperCoinFill className="text-2xl text-celo-primary" />
+                    <div className="text-left">
+                      <p className="font-semibold text-white">CELO</p>
+                      <p className="text-xs text-gray-400">Native Token</p>
+                    </div>
+                  </div>
+                  {token === 'CELO' && <IoSparkles className="text-celo-primary" />}
+                </div>
+                <p className="text-right text-sm text-gray-400 mt-2">
+                  {parseFloat(balance).toFixed(4)} available
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setToken('cUSD')}
+                className={`p-4 rounded-xl border-2 transition-all ${
+                  token === 'cUSD'
+                    ? 'border-celo-green bg-celo-green/20 shadow-glow-green'
+                    : 'border-white/20 bg-white/5 hover:border-white/40'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-celo-green rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">$</span>
+                    </div>
+                    <div className="text-left">
+                      <p className="font-semibold text-white">cUSD</p>
+                      <p className="text-xs text-gray-400">Stablecoin</p>
+                    </div>
+                  </div>
+                  {token === 'cUSD' && <IoSparkles className="text-celo-green" />}
+                </div>
+                <p className="text-right text-sm text-gray-400 mt-2">
+                  {parseFloat(cUSDBalance).toFixed(2)} available
+                </p>
+              </button>
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          {/* Recipient Address */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-300">
               Recipient Address
             </label>
             <input
@@ -105,31 +159,39 @@ const SendPayment = () => {
               value={recipient}
               onChange={(e) => setRecipient(e.target.value)}
               placeholder="0x..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 glass-effect rounded-xl border border-white/20 focus:border-celo-primary focus:ring-2 focus:ring-celo-primary/50 transition-all text-white placeholder-gray-500"
               required
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          {/* Amount */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-300">
               Amount ({token})
             </label>
-            <input
-              type="number"
-              step="0.01"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="0.00"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
-            />
-            <p className="text-sm text-gray-500 mt-1">
-              Available: {token === 'CELO' ? parseFloat(balance).toFixed(4) : parseFloat(cUSDBalance).toFixed(2)} {token}
-            </p>
+            <div className="relative">
+              <input
+                type="number"
+                step="0.01"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="0.00"
+                className="w-full px-4 py-3 glass-effect rounded-xl border border-white/20 focus:border-celo-primary focus:ring-2 focus:ring-celo-primary/50 transition-all text-white placeholder-gray-500"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setAmount(token === 'CELO' ? balance : cUSDBalance)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs px-3 py-1 bg-celo-primary/20 text-celo-primary rounded-lg hover:bg-celo-primary/30 transition-colors"
+              >
+                MAX
+              </button>
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          {/* Reference */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-300">
               Reference (Optional)
             </label>
             <input
@@ -137,28 +199,43 @@ const SendPayment = () => {
               value={reference}
               onChange={(e) => setReference(e.target.value)}
               placeholder="Payment for..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 glass-effect rounded-xl border border-white/20 focus:border-celo-primary focus:ring-2 focus:ring-celo-primary/50 transition-all text-white placeholder-gray-500"
             />
           </div>
 
+          {/* Error Message */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-red-800 text-sm">{error}</p>
+            <div className="flex items-start space-x-3 p-4 bg-red-500/20 border border-red-500/50 rounded-xl">
+              <FaExclamationCircle className="text-red-400 flex-shrink-0 mt-0.5" />
+              <p className="text-red-400 text-sm">{error}</p>
             </div>
           )}
 
+          {/* Success Message */}
           {success && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <p className="text-green-800 text-sm">{success}</p>
+            <div className="flex items-start space-x-3 p-4 bg-green-500/20 border border-green-500/50 rounded-xl">
+              <FaCheckCircle className="text-green-400 flex-shrink-0 mt-0.5" />
+              <p className="text-green-400 text-sm">{success}</p>
             </div>
           )}
 
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            className="w-full py-4 bg-gradient-celo text-celo-dark font-bold rounded-xl shadow-glow hover:shadow-glow-green disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center space-x-2"
           >
-            {loading ? 'Sending...' : 'Send Payment'}
+            {loading ? (
+              <>
+                <div className="w-5 h-5 border-2 border-celo-dark border-t-transparent rounded-full animate-spin" />
+                <span>Sending...</span>
+              </>
+            ) : (
+              <>
+                <FaPaperPlane />
+                <span>Send Payment</span>
+              </>
+            )}
           </button>
         </form>
       </div>
