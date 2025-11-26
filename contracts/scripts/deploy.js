@@ -6,8 +6,8 @@ async function main() {
   
   // Set cUSD address based on network
   if (network === "sepolia") {
-    // cUSD on Celo Sepolia Testnet
-    cUSDAddress = "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1"; // Update if different
+    // cUSD on Celo Sepolia Testnet (Official address from docs.celo.org)
+    cUSDAddress = "0xEF4d55D6dE8e8d73232827Cd1e9b2F2dBb45bC80";
     console.log("Deploying to Celo Sepolia Testnet...");
   } else if (network === "alfajores") {
     // cUSD on Celo Alfajores Testnet
@@ -19,7 +19,7 @@ async function main() {
     console.log("Deploying to Celo Mainnet...");
   } else {
     console.log("Deploying to local network...");
-    cUSDAddress = "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1";
+    cUSDAddress = "0xEF4d55D6dE8e8d73232827Cd1e9b2F2dBb45bC80";
   }
 
   console.log("Deploying CeloTapPayment contract...");
