@@ -3,10 +3,11 @@ import { useCelo } from '../context/CeloContext';
 import { ethers } from 'ethers';
 
 const SendPayment = () => {
-  const { kit, address, updateBalances, cUSDBalance } = useCelo();
+  const { kit, address, updateBalances, cUSDBalance, balance } = useCelo();
   const [recipient, setRecipient] = useState('');
   const [amount, setAmount] = useState('');
   const [reference, setReference] = useState('');
+  const [token, setToken] = useState('CELO'); // Default to CELO since it works
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -28,21 +29,40 @@ const SendPayment = () => {
 
       const amountInWei = ethers.utils.parseEther(amount);
       
-      if (parseFloat(amount) > parseFloat(cUSDBalance)) {
-        throw new Error('Insufficient cUSD balance');
+      // Check balance based on selected token
+      const availableBalance = token === 'CELO' ? balance : cUSDBalance;
+      if (parseFloat(amount) > parseFloat(availableBalance)) {
+        throw new Error(`Insufficient ${token} balance`);
       }
 
-      const cUSDAddress = import.meta.env.VITE_CUSD_ADDRESS || '0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1';
-      const stableToken = await kit.contracts.getStableToken(cUSDAddress);
+      let tx;
       
-      const tx = await stableToken.transfer(recipient, amountInWei.toString()).send({
-        from: address,
-        gasPrice: '1000000000',
-      });
+      if (token === 'CELO') {
+        // Send native CELO
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        
+        tx = await signer.sendTransaction({
+          to: recipient,
+          value: amountInWei,
+        });
+        
+        await tx.wait();
+        setSuccess(`Payment sent successfully! Tx: ${tx.hash}`);
+      } else {
+        // Send cUSD token
+        const cUSDAddress = import.meta.env.VITE_CUSD_ADDRESS || '0xEF4d55D6dE8e8d73232827Cd1e9b2F2dBb45bC80';
+        const stableToken = await kit.contracts.getStableToken(cUSDAddress);
+        
+        tx = await stableToken.transfer(recipient, amountInWei.toString()).send({
+          from: address,
+          gasPrice: '1000000000',
+        });
 
-      await tx.waitReceipt();
+        await tx.waitReceipt();
+        setSuccess(`Payment sent successfully! Tx: ${tx.transactionHash}`);
+      }
 
-      setSuccess(`Payment sent successfully! Tx: ${tx.transactionHash}`);
       setRecipient('');
       setAmount('');
       setReference('');
@@ -64,6 +84,20 @@ const SendPayment = () => {
         <form onSubmit={handleSend} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
+              Select Token
+            </label>
+            <select
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="CELO">CELO (Native)</option>
+              <option value="cUSD">cUSD (Stablecoin)</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Recipient Address
             </label>
             <input
@@ -78,7 +112,7 @@ const SendPayment = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Amount (cUSD)
+              Amount ({token})
             </label>
             <input
               type="number"
@@ -90,7 +124,7 @@ const SendPayment = () => {
               required
             />
             <p className="text-sm text-gray-500 mt-1">
-              Available: {parseFloat(cUSDBalance).toFixed(2)} cUSD
+              Available: {token === 'CELO' ? parseFloat(balance).toFixed(4) : parseFloat(cUSDBalance).toFixed(2)} {token}
             </p>
           </div>
 
