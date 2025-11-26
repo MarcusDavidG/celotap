@@ -13,7 +13,7 @@ contract CeloTapPayment {
     mapping(bytes32 => address) public phoneToAddress;
 
     // Event emitted for a payment
-    event PaymentMade(address indexed from, address indexed to, uint256 amount, string reference);
+    event PaymentMade(address indexed from, address indexed to, uint256 amount, string paymentReference);
 
     constructor(address _cUSDAddress) {
         cUSDAddress = _cUSDAddress;
@@ -25,8 +25,8 @@ contract CeloTapPayment {
         phoneToAddress[phoneHash] = msg.sender;
     }
 
-    /// @notice Make payment to a recipient address with reference
-    function pay(address recipient, uint256 amount, string calldata reference) external {
+    /// @notice Make payment to a recipient address with payment reference
+    function pay(address recipient, uint256 amount, string calldata paymentReference) external {
         require(recipient != address(0), "Invalid recipient");
         require(amount > 0, "Amount must be > 0");
 
@@ -34,14 +34,18 @@ contract CeloTapPayment {
 
         require(cUSD.transferFrom(msg.sender, recipient, amount), "Payment failed");
 
-        emit PaymentMade(msg.sender, recipient, amount, reference);
+        emit PaymentMade(msg.sender, recipient, amount, paymentReference);
     }
 
     /// @notice Make payment by phone number hash
-    function payByPhone(bytes32 phoneHash, uint256 amount, string calldata reference) external {
+    function payByPhone(bytes32 phoneHash, uint256 amount, string calldata paymentReference) external {
         address recipient = phoneToAddress[phoneHash];
         require(recipient != address(0), "Recipient not found");
+        require(amount > 0, "Amount must be > 0");
 
-        pay(recipient, amount, reference);
+        IERC20 cUSD = IERC20(cUSDAddress);
+        require(cUSD.transferFrom(msg.sender, recipient, amount), "Payment failed");
+
+        emit PaymentMade(msg.sender, recipient, amount, paymentReference);
     }
 }
