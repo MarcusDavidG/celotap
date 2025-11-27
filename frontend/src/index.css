@@ -4,13 +4,29 @@
 
 @layer base {
   body {
-    @apply bg-gradient-to-br from-gray-900 via-celo-darkBlue to-gray-900 text-white min-h-screen;
+    @apply min-h-screen transition-colors duration-300;
+  }
+  
+  /* Dark mode (default) */
+  .dark body {
+    @apply bg-gradient-to-br from-gray-900 via-celo-darkBlue to-gray-900 text-white;
+  }
+  
+  /* Light mode */
+  .light body {
+    @apply bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100 text-gray-900;
   }
 }
 
 @layer utilities {
-  .glass-effect {
+  /* Glass effect - dark mode */
+  .dark .glass-effect {
     @apply bg-white/10 backdrop-blur-lg border border-white/20;
+  }
+  
+  /* Glass effect - light mode */
+  .light .glass-effect {
+    @apply bg-white/80 backdrop-blur-lg border border-gray-200 shadow-lg;
   }
   
   .card-hover {
@@ -19,5 +35,18 @@
   
   .gradient-text {
     @apply bg-gradient-celo bg-clip-text text-transparent;
+  }
+  
+  /* Text colors for light mode */
+  .light .text-gray-400 {
+    @apply text-gray-600;
+  }
+  
+  .light .text-gray-500 {
+    @apply text-gray-700;
+  }
+  
+  .light .text-white {
+    @apply text-gray-900;
   }
 }
