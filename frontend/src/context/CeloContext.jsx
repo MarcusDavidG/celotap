@@ -95,19 +95,37 @@ export const CeloProvider = ({ children }) => {
 
   useEffect(() => {
     if (window.ethereum) {
-      window.ethereum.on('accountsChanged', (accounts) => {
+      // Handle account changes - disconnect if user switches/removes account
+      const handleAccountsChanged = (accounts) => {
         if (accounts.length === 0) {
+          // User disconnected wallet
           disconnectWallet();
-        } else {
-          connectWallet();
+        } else if (connected && accounts[0] !== address) {
+          // User switched account while connected
+          disconnectWallet();
         }
-      });
+      };
 
-      window.ethereum.on('chainChanged', () => {
-        window.location.reload();
-      });
+      // Handle network changes
+      const handleChainChanged = () => {
+        // Only disconnect, don't auto-reconnect
+        if (connected) {
+          disconnectWallet();
+        }
+      };
+
+      window.ethereum.on('accountsChanged', handleAccountsChanged);
+      window.ethereum.on('chainChanged', handleChainChanged);
+
+      // Cleanup listeners
+      return () => {
+        if (window.ethereum.removeListener) {
+          window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+          window.ethereum.removeListener('chainChanged', handleChainChanged);
+        }
+      };
     }
-  }, []);
+  }, [connected, address]);
 
   const value = {
     kit,
