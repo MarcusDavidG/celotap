@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useCelo } from '../context/CeloContext';
 import { ethers } from 'ethers';
-import { FaPaperPlane, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
+import { FaPaperPlane, FaCheckCircle, FaExclamationCircle, FaQrcode } from 'react-icons/fa';
 import { RiCopperCoinFill } from 'react-icons/ri';
 import { IoSparkles } from 'react-icons/io5';
 import { usePrices } from '../hooks/usePrices';
+import QRScanner from './QRScanner';
 
 const SendPayment = () => {
   const { kit, address, updateBalances, cUSDBalance, balance } = useCelo();
@@ -16,6 +17,14 @@ const SendPayment = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showScanner, setShowScanner] = useState(false);
+
+  const handleScanComplete = (scannedAddress) => {
+    setRecipient(scannedAddress);
+    setShowScanner(false);
+    setSuccess('Address scanned successfully!');
+    setTimeout(() => setSuccess(''), 3000);
+  };
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -156,14 +165,24 @@ const SendPayment = () => {
             <label className="block text-sm font-medium text-gray-300">
               Recipient Address
             </label>
-            <input
-              type="text"
-              value={recipient}
-              onChange={(e) => setRecipient(e.target.value)}
-              placeholder="0x..."
-              className="w-full px-4 py-3 glass-effect rounded-xl border border-white/20 focus:border-celo-primary focus:ring-2 focus:ring-celo-primary/50 transition-all text-white placeholder-gray-500"
-              required
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={recipient}
+                onChange={(e) => setRecipient(e.target.value)}
+                placeholder="0x..."
+                className="w-full px-4 py-3 pr-14 glass-effect rounded-xl border border-white/20 focus:border-celo-primary focus:ring-2 focus:ring-celo-primary/50 transition-all text-white placeholder-gray-500"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowScanner(true)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-celo-primary/20 hover:bg-celo-primary/30 text-celo-primary rounded-lg transition-colors"
+                title="Scan QR Code"
+              >
+                <FaQrcode className="text-xl" />
+              </button>
+            </div>
           </div>
 
           {/* Amount */}
@@ -246,6 +265,14 @@ const SendPayment = () => {
           </button>
         </form>
       </div>
+
+      {/* QR Scanner Modal */}
+      {showScanner && (
+        <QRScanner
+          onScan={handleScanComplete}
+          onClose={() => setShowScanner(false)}
+        />
+      )}
     </div>
   );
 };
