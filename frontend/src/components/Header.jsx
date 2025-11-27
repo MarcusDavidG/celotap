@@ -1,10 +1,12 @@
 import React from 'react';
 import { useCelo } from '../context/CeloContext';
-import { FaWallet, FaPowerOff } from 'react-icons/fa';
+import { useTheme } from '../context/ThemeContext';
+import { FaWallet, FaPowerOff, FaMoon, FaSun } from 'react-icons/fa';
 import { RiCopperCoinFill } from 'react-icons/ri';
 
 const Header = () => {
   const { address, connected, connectWallet, disconnectWallet, cUSDBalance, balance } = useCelo();
+  const { theme, toggleTheme } = useTheme();
 
   const formatAddress = (addr) => {
     if (!addr) return '';
@@ -25,7 +27,20 @@ const Header = () => {
             </div>
           </div>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-3 glass-effect rounded-lg border border-white/20 hover:border-celo-primary/50 transition-all duration-300 group"
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            >
+              {theme === 'dark' ? (
+                <FaSun className="text-celo-primary group-hover:rotate-180 transition-transform duration-500" />
+              ) : (
+                <FaMoon className="text-celo-primary group-hover:-rotate-12 transition-transform duration-300" />
+              )}
+            </button>
+
             {connected ? (
               <>
                 <div className="hidden sm:flex flex-col items-end glass-effect px-4 py-2 rounded-lg">

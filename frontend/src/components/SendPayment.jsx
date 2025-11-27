@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { useCelo } from '../context/CeloContext';
 import { ethers } from 'ethers';
-import { FaPaperPlane, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
+import toast from 'react-hot-toast';
+import { FaPaperPlane, FaQrcode, FaAddressBook } from 'react-icons/fa';
 import { RiCopperCoinFill } from 'react-icons/ri';
 import { IoSparkles } from 'react-icons/io5';
 import { usePrices } from '../hooks/usePrices';
+import QRScanner from './QRScanner';
+import AddressBook from './AddressBook';
 
 const SendPayment = () => {
   const { kit, address, updateBalances, cUSDBalance, balance } = useCelo();
@@ -14,14 +17,26 @@ const SendPayment = () => {
   const [reference, setReference] = useState('');
   const [token, setToken] = useState('CELO');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [showScanner, setShowScanner] = useState(false);
+  const [showAddressBook, setShowAddressBook] = useState(false);
+
+  const handleScanComplete = (scannedAddress) => {
+    setRecipient(scannedAddress);
+    setShowScanner(false);
+    toast.success('Address scanned successfully!');
+  };
+
+  const handleAddressSelect = (selectedAddress) => {
+    setRecipient(selectedAddress);
+    setShowAddressBook(false);
+    toast.success('Address selected from address book!');
+  };
 
   const handleSend = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
     setLoading(true);
+
+    const loadingToast = toast.loading('Sending payment...');
 
     try {
       if (!kit || !address) {
@@ -62,7 +77,9 @@ const SendPayment = () => {
         });
 
         await tx.waitReceipt();
-        setSuccess(`Payment sent successfully! Tx: ${tx.transactionHash}`);
+        toast.success(`Payment sent successfully! Tx: ${tx.transactionHash?.substring(0, 10)}...`, {
+          duration: 6000,
+        });
       }
 
       setRecipient('');
@@ -70,9 +87,11 @@ const SendPayment = () => {
       setReference('');
       
       await updateBalances();
+      toast.dismiss(loadingToast);
     } catch (err) {
       console.error('Payment error:', err);
-      setError(err.message || 'Failed to send payment');
+      toast.dismiss(loadingToast);
+      toast.error(err.message || 'Failed to send payment');
     } finally {
       setLoading(false);
     }
@@ -156,14 +175,34 @@ const SendPayment = () => {
             <label className="block text-sm font-medium text-gray-300">
               Recipient Address
             </label>
-            <input
-              type="text"
-              value={recipient}
-              onChange={(e) => setRecipient(e.target.value)}
-              placeholder="0x..."
-              className="w-full px-4 py-3 glass-effect rounded-xl border border-white/20 focus:border-celo-primary focus:ring-2 focus:ring-celo-primary/50 transition-all text-white placeholder-gray-500"
-              required
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={recipient}
+                onChange={(e) => setRecipient(e.target.value)}
+                placeholder="0x..."
+                className="w-full px-4 py-3 pr-24 glass-effect rounded-xl border border-white/20 focus:border-celo-primary focus:ring-2 focus:ring-celo-primary/50 transition-all text-white placeholder-gray-500"
+                required
+              />
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center space-x-1">
+                <button
+                  type="button"
+                  onClick={() => setShowAddressBook(true)}
+                  className="p-2 bg-celo-green/20 hover:bg-celo-green/30 text-celo-green rounded-lg transition-colors"
+                  title="Address Book"
+                >
+                  <FaAddressBook className="text-xl" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowScanner(true)}
+                  className="p-2 bg-celo-primary/20 hover:bg-celo-primary/30 text-celo-primary rounded-lg transition-colors"
+                  title="Scan QR Code"
+                >
+                  <FaQrcode className="text-xl" />
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Amount */}
@@ -210,22 +249,6 @@ const SendPayment = () => {
             />
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className="flex items-start space-x-3 p-4 bg-red-500/20 border border-red-500/50 rounded-xl">
-              <FaExclamationCircle className="text-red-400 flex-shrink-0 mt-0.5" />
-              <p className="text-red-400 text-sm">{error}</p>
-            </div>
-          )}
-
-          {/* Success Message */}
-          {success && (
-            <div className="flex items-start space-x-3 p-4 bg-green-500/20 border border-green-500/50 rounded-xl">
-              <FaCheckCircle className="text-green-400 flex-shrink-0 mt-0.5" />
-              <p className="text-green-400 text-sm">{success}</p>
-            </div>
-          )}
-
           {/* Submit Button */}
           <button
             type="submit"
@@ -246,6 +269,22 @@ const SendPayment = () => {
           </button>
         </form>
       </div>
+
+      {/* QR Scanner Modal */}
+      {showScanner && (
+        <QRScanner
+          onScan={handleScanComplete}
+          onClose={() => setShowScanner(false)}
+        />
+      )}
+
+      {/* Address Book Modal */}
+      {showAddressBook && (
+        <AddressBook
+          onSelect={handleAddressSelect}
+          onClose={() => setShowAddressBook(false)}
+        />
+      )}
     </div>
   );
 };
