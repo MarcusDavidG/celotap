@@ -4,9 +4,11 @@ import { ethers } from 'ethers';
 import { FaPaperPlane, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import { RiCopperCoinFill } from 'react-icons/ri';
 import { IoSparkles } from 'react-icons/io5';
+import { usePrices } from '../hooks/usePrices';
 
 const SendPayment = () => {
   const { kit, address, updateBalances, cUSDBalance, balance } = useCelo();
+  const { formatUSD } = usePrices();
   const [recipient, setRecipient] = useState('');
   const [amount, setAmount] = useState('');
   const [reference, setReference] = useState('');
@@ -187,6 +189,11 @@ const SendPayment = () => {
                 MAX
               </button>
             </div>
+            {amount && parseFloat(amount) > 0 && (
+              <p className="text-sm text-gray-400 mt-2">
+                ≈ {formatUSD(parseFloat(amount), token)}
+              </p>
+            )}
           </div>
 
           {/* Reference */}

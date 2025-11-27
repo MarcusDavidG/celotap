@@ -4,9 +4,11 @@ import { Link } from 'react-router-dom';
 import { FaPaperPlane, FaQrcode, FaStore, FaWallet, FaCoins } from 'react-icons/fa';
 import { IoSparkles } from 'react-icons/io5';
 import { RiCopperCoinFill } from 'react-icons/ri';
+import { usePrices } from '../hooks/usePrices';
 
 const Dashboard = () => {
   const { connected, address, cUSDBalance, balance } = useCelo();
+  const { formatUSD } = usePrices();
 
   if (!connected) {
     return (
@@ -58,8 +60,11 @@ const Dashboard = () => {
             </span>
           </div>
           <h3 className="text-sm font-medium text-gray-400 mb-2">CELO Balance</h3>
-          <p className="text-4xl font-bold text-celo-primary mb-2">
+          <p className="text-4xl font-bold text-celo-primary mb-1">
             {parseFloat(balance).toFixed(4)}
+          </p>
+          <p className="text-lg text-celo-primary/70 mb-2">
+            ≈ {formatUSD(parseFloat(balance), 'CELO')}
           </p>
           <p className="text-sm text-gray-500">Native Token</p>
         </div>
@@ -74,8 +79,11 @@ const Dashboard = () => {
             </span>
           </div>
           <h3 className="text-sm font-medium text-gray-400 mb-2">cUSD Balance</h3>
-          <p className="text-4xl font-bold text-celo-green mb-2">
+          <p className="text-4xl font-bold text-celo-green mb-1">
             {parseFloat(cUSDBalance).toFixed(2)}
+          </p>
+          <p className="text-lg text-celo-green/70 mb-2">
+            ≈ {formatUSD(parseFloat(cUSDBalance), 'cUSD')}
           </p>
           <p className="text-sm text-gray-500">Celo Dollar</p>
         </div>
