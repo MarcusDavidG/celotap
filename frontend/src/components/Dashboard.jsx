@@ -5,6 +5,7 @@ import { FaPaperPlane, FaQrcode, FaStore, FaWallet, FaCoins } from 'react-icons/
 import { IoSparkles } from 'react-icons/io5';
 import { RiCopperCoinFill } from 'react-icons/ri';
 import { usePrices } from '../hooks/usePrices';
+import TransactionHistory from './TransactionHistory';
 
 const Dashboard = () => {
   const { connected, address, cUSDBalance, balance } = useCelo();
@@ -130,6 +131,9 @@ const Dashboard = () => {
           <p className="text-gray-400 text-sm">Quick payment requests for business</p>
         </Link>
       </div>
+
+      {/* Transaction History */}
+      <TransactionHistory address={address} />
 
       {/* Stats Banner */}
       <div className="glass-effect rounded-2xl p-6 border border-celo-primary/20">
